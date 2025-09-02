@@ -2,7 +2,6 @@
 description: Create an Agentic Project Workflow tasks list from an approved feature spec
 globs:
 alwaysApply: false
-version: 1.1
 encoding: UTF-8
 ---
 

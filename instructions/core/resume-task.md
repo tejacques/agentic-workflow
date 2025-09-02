@@ -2,7 +2,6 @@
 description: Resume interrupted task with full context restoration from session logs
 globs:
 alwaysApply: false
-version: 1.0
 encoding: UTF-8
 ---
 

@@ -2,7 +2,6 @@
 description: Analyze Current Product & Install Agentic Project Workflow
 globs:
 alwaysApply: false
-version: 1.0
 encoding: UTF-8
 ---
 

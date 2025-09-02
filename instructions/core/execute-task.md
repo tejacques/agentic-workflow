@@ -2,7 +2,6 @@
 description: Rules to execute a task and its sub-tasks using Agentic Project Workflow
 globs:
 alwaysApply: false
-version: 1.0
 encoding: UTF-8
 ---
 
@@ -257,6 +256,74 @@ IMPORTANT: In the tasks.md file, mark this task and its sub-tasks complete by up
 </step>
 
 </process_flow>
+
+## Error Handling & Recovery
+
+<error_handling>
+  <common_failures>
+    - technical_spec_missing: No technical specification available for task
+    - implementation_blocker: Code dependencies or API limitations prevent completion
+    - test_failures: Tests fail repeatedly despite multiple fix attempts
+    - integration_conflicts: Task conflicts with existing system components
+    - dependency_unavailable: Required services or libraries not accessible
+  </common_failures>
+  
+  <recovery_strategies>
+    <technical_spec_missing>
+      ACTION: Escalate immediately to user
+      REQUEST: "Technical specification missing for [task]. Need guidance on implementation approach."
+      PAUSE: Task execution until user provides technical direction
+      NEVER: Make assumptions or proceed without proper specification
+    </technical_spec_missing>
+    
+    <implementation_blocker>
+      ACTION: Document specific blocker with technical details
+      STATUS: Use project-manager agent to mark task as blocked in tasks.md
+      OPTIONS: Attempt alternative approach OR escalate to user
+      LIMIT: Maximum 3 different approaches before escalating
+    </implementation_blocker>
+    
+    <test_failures>
+      ACTION: Debug systematically with detailed error analysis
+      APPROACH: Fix one test at a time, verify individual fixes
+      ESCALATE: After 3 failed attempts, escalate to user with full error context
+    </test_failures>
+    
+    <integration_conflicts>
+      ACTION: Analyze conflict and document impact assessment
+      ESCALATE: Always escalate to user for decision
+      REQUEST: "Integration conflict detected: [details]. How should we proceed?"
+      NEVER: Make architectural decisions without user input
+    </integration_conflicts>
+  </recovery_strategies>
+</error_handling>
+
+## Claude Code Integration
+
+<claude_code_patterns>
+  <tool_permissions>
+    - Use Read/Write/Edit tools for all file operations
+    - Restrict Bash tool to safe, documented commands only
+    - Use Task tool with specific subagent_type for delegations
+    - Never use destructive operations without explicit confirmation
+  </tool_permissions>
+  
+  <agent_delegation>
+    - Use project-manager agent for updating task status in tasks.md files
+    - Always specify subagent_type when using Task tool
+    - Provide detailed context and specific requests to agents
+    - Wait for agent completion before proceeding to next step
+    - Validate agent outputs match expected format and content
+  </agent_delegation>
+  
+  <progress_tracking>
+    - Use TodoWrite for Claude's internal progress tracking only
+    - Use project-manager agent for updating tasks.md task completion status
+    - Update task status immediately after completing each subtask
+    - Mark tasks complete only when fully implemented and tested
+    - Maintain clear separation between internal tracking and project tracking
+  </progress_tracking>
+</claude_code_patterns>
 
 <post_flight_check>
   EXECUTE: @.agentic-workflow/instructions/meta/post-flight.md

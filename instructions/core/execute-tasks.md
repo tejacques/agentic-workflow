@@ -2,7 +2,6 @@
 description: Rules to initiate execution of a set of tasks using Agentic Project Workflow
 globs:
 alwaysApply: false
-version: 1.0
 encoding: UTF-8
 ---
 
@@ -181,6 +180,80 @@ After all tasks in tasks.md have been implemented, use @.agentic-workflow/instru
 </step>
 
 </process_flow>
+
+## Error Handling & Recovery
+
+<error_handling>
+  <common_failures>
+    - spec_not_found: Spec folder doesn't exist
+    - tasks_missing: No tasks.md found in spec folder
+    - branch_conflicts: Git conflicts prevent branch switching
+    - dependency_failures: Required tools or services unavailable
+    - implementation_blockers: Technical constraints prevent task completion
+  </common_failures>
+  
+  <recovery_strategies>
+    <spec_not_found>
+      ACTION: List available specs and ask user for correct path
+      FALLBACK: Use most recent spec if user agrees
+    </spec_not_found>
+    
+    <tasks_missing>
+      ACTION: Use create-tasks command to generate task list
+      CONFIRM: Task generation with user before proceeding
+    </tasks_missing>
+    
+    <branch_conflicts>
+      ACTION: Use git-workflow agent to handle conflicts safely
+      PAUSE: Execution until conflicts resolved
+    </branch_conflicts>
+    
+    <dependency_failures>
+      ACTION: Document missing dependencies
+      OPTIONS: Install dependencies OR mark tasks as blocked
+      CONTINUE: With remaining implementable tasks
+    </dependency_failures>
+    
+    <implementation_blockers>
+      ACTION: Document blocker in task notes
+      STATUS: Mark task as blocked, not failed
+      REPORT: Summary of blockers at completion
+    </implementation_blockers>
+  </recovery_strategies>
+  
+  <graceful_degradation>
+    - Never fail silently - always report issues
+    - Complete what's possible when facing blockers
+    - Update task status to reflect actual progress
+    - Provide clear next steps for blocked items
+    - Generate summary of completed vs blocked work
+  </graceful_degradation>
+</error_handling>
+
+## Claude Code Integration
+
+<claude_code_patterns>
+  <tool_permissions>
+    - Use Task tool for all agent delegations
+    - Restrict Bash tool to safe, documented commands
+    - Use Read/Write/Edit tools for file operations
+    - Never use destructive operations without confirmation
+  </tool_permissions>
+  
+  <agent_delegation>
+    - Always specify subagent_type when using Task tool
+    - Provide detailed context in agent prompts
+    - Wait for agent completion before continuing
+    - Validate agent outputs before proceeding
+  </agent_delegation>
+  
+  <progress_tracking>
+    - Use TodoWrite for complex multi-step processes
+    - Update progress after each completed step
+    - Mark tasks complete immediately upon finish
+    - Maintain single in-progress task when possible
+  </progress_tracking>
+</claude_code_patterns>
 
 <post_flight_check>
   EXECUTE: @.agentic-workflow/instructions/meta/post-flight.md

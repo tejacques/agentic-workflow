@@ -2,7 +2,6 @@
 description: Spec Creation Rules for Agentic Project Workflow
 globs:
 alwaysApply: false
-version: 1.1
 encoding: UTF-8
 ---
 

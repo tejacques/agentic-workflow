@@ -2,7 +2,6 @@
 description: Product Planning Rules for Agentic Project Workflow
 globs:
 alwaysApply: false
-version: 4.0
 encoding: UTF-8
 ---
 

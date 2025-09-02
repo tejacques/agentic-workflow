@@ -2,7 +2,6 @@
 description: Analyze current session for discoveries and update institutional knowledge documentation
 globs:
 alwaysApply: false
-version: 1.0
 encoding: UTF-8
 ---
 

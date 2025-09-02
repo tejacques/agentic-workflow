@@ -2,7 +2,6 @@
 description: Rules to finish off and deliver to user set of tasks that have been completed using Agentic Project Workflow
 globs:
 alwaysApply: false
-version: 1.0
 encoding: UTF-8
 ---
 
@@ -280,6 +279,39 @@ Use the project-manager subagent to play a system sound to alert the user that t
 </step>
 
 </process_flow>
+
+## Error Handling & Recovery
+
+<error_handling>
+  <common_failures>
+    - test_failures: Test suite fails preventing completion
+    - acceptance_validation_fails: Implementation doesn't meet spec requirements
+    - git_workflow_blocked: Git conflicts or push failures prevent PR creation
+    - missing_dependencies: Required tools or services unavailable for final steps
+  </common_failures>
+  
+  <recovery_strategies>
+    <test_failures>
+      ACTION: Use test-runner agent to identify specific failures
+      RESOLUTION: Fix failing tests before proceeding to next steps
+      ESCALATE: If tests cannot be fixed after multiple attempts, escalate to user
+      NEVER: Skip test validation - always ensure passing tests
+    </test_failures>
+    
+    <acceptance_validation_fails>
+      ACTION: Use acceptance-validator agent to identify specific gaps
+      RESOLUTION: Return to implementation phase to address gaps
+      ESCALATE: If acceptance criteria conflicts exist, escalate to user for clarification
+      DOCUMENT: Record any scope changes or requirement updates
+    </acceptance_validation_fails>
+    
+    <git_workflow_blocked>
+      ACTION: Use git-workflow agent to handle conflicts safely
+      RESOLUTION: Resolve conflicts before proceeding with PR creation
+      ESCALATE: For complex merge conflicts that require architectural decisions
+    </git_workflow_blocked>
+  </recovery_strategies>
+</error_handling>
 
 <post_flight_check>
   EXECUTE: @.agentic-workflow/instructions/meta/post-flight.md

@@ -2,7 +2,6 @@
 description: Common Pre-Flight Steps for Agentic Project Workflow Instructions
 globs:
 alwaysApply: false
-version: 1.0
 encoding: UTF-8
 ---
 
