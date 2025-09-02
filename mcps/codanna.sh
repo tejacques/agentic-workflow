@@ -54,7 +54,7 @@ install_codanna_tool() {
     fi
     
     # Install via cargo
-    if cargo install codanna 2>/dev/null; then
+    if cargo install codanna; then
         echo "  ✓ Codanna installed successfully"
         return 0
     else

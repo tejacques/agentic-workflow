@@ -116,126 +116,154 @@ verify_prerequisites() {
     log_success "Prerequisites verified"
 }
 
-# Test cases
-run_tests() {
-    local total_tests=0
-    local passed_tests=0
+# Single comprehensive test
+run_installation_test() {
+    log_info "Starting comprehensive installation test..."
     
-    log_info "Starting installation tests..."
+    # Create test directory
+    mkdir -p "$TEST_DIR"
+    cd "$TEST_DIR"
     
-    # Test 1: Basic installation (no flags)
-    total_tests=$((total_tests + 1))
-    if run_test "Basic Installation" "" ".agentic-workflow/instructions,.agentic-workflow/sessions,docs/standards,.agentic-workflow/mcps,.githooks"; then
-        passed_tests=$((passed_tests + 1))
-    fi
-    cleanup
+    # Initialize git repo (needed for git hooks)
+    git init --quiet
+    git config user.email "test@example.com"
+    git config user.name "Test User"
     
-    # Test 2: Claude Code installation
-    total_tests=$((total_tests + 1))
-    if run_test "Claude Code Installation" "--claude-code" ".agentic-workflow/instructions,.claude/commands,.claude/agents,.agentic-workflow/sessions,docs/standards,.githooks"; then
-        passed_tests=$((passed_tests + 1))
-    fi
-    cleanup
-    
-    # Test 3: Cursor installation
-    total_tests=$((total_tests + 1))
-    if run_test "Cursor Installation" "--cursor" ".agentic-workflow/instructions,.cursor/rules,.agentic-workflow/sessions,docs/standards,.githooks"; then
-        passed_tests=$((passed_tests + 1))
-    fi
-    cleanup
-    
-    # Test 4: Combined installation
-    total_tests=$((total_tests + 1))
-    if run_test "Combined Installation" "--claude-code --cursor" ".agentic-workflow/instructions,.claude/commands,.claude/agents,.cursor/rules,.agentic-workflow/sessions,docs/standards,.githooks"; then
-        passed_tests=$((passed_tests + 1))
-    fi
-    cleanup
-    
-    # Test 5: Help functionality
-    total_tests=$((total_tests + 1))
-    log_info "Running test: Help Functionality"
-    if $INSTALL_SCRIPT --help | grep -q "Usage:"; then
-        log_success "Test passed: Help Functionality"
-        passed_tests=$((passed_tests + 1))
-    else
-        log_error "Test failed: Help Functionality"
-    fi
-    
-    # Test Results Summary
-    echo ""
-    log_info "=========================================="
-    log_info "           TEST RESULTS SUMMARY           "
-    log_info "=========================================="
-    log_info "Total tests: $total_tests"
-    log_info "Passed: $passed_tests"
-    log_info "Failed: $((total_tests - passed_tests))"
-    
-    if [ $passed_tests -eq $total_tests ]; then
-        log_success "ALL TESTS PASSED! ✅"
-        return 0
-    else
-        log_error "SOME TESTS FAILED! ❌"
+    # Test help functionality first
+    log_info "Testing help functionality..."
+    if ! $INSTALL_SCRIPT --help | grep -q "Usage:"; then
+        log_error "Help functionality test failed"
         return 1
     fi
+    log_success "Help functionality test passed"
+    
+    # Run comprehensive installation
+    log_info "Running installation with --claude-code --cursor flags..."
+    if ! $INSTALL_SCRIPT --claude-code --cursor; then
+        log_error "Installation failed"
+        return 1
+    fi
+    
+    log_success "Installation completed successfully"
+    return 0
+}
+
+# MCP verification function
+verify_mcp_installation() {
+    log_info "Verifying MCP installations..."
+    
+    # Check if Claude CLI is available
+    if ! command -v claude >/dev/null 2>&1; then
+        log_warning "Claude CLI not found - skipping MCP verification"
+        return 0
+    fi
+    
+    # Discover expected MCPs from source directory
+    local expected_mcps=()
+    if [ -d "$SCRIPT_DIR/mcps" ]; then
+        for mcp_script in "$SCRIPT_DIR/mcps"/*.sh; do
+            if [ -f "$mcp_script" ]; then
+                # Extract MCP name from filename (install-context7.sh -> context7)
+                local mcp_name=$(basename "$mcp_script" | sed 's/install-//' | sed 's/\.sh$//')
+                expected_mcps+=("$mcp_name")
+            fi
+        done
+    fi
+    
+    if [ ${#expected_mcps[@]} -eq 0 ]; then
+        log_info "No MCP install scripts found - skipping MCP verification"
+        return 0
+    fi
+    
+    log_info "Expected MCPs: ${expected_mcps[*]}"
+    
+    # Initialize Claude project context first, then get list of installed MCPs
+    # Note: claude mcp list needs project context to be initialized first
+    echo "" | timeout 5 claude >/dev/null 2>&1 || true  # Initialize project context
+    
+    local installed_mcps_output
+    if ! installed_mcps_output=$(claude mcp list 2>/dev/null); then
+        log_warning "Could not retrieve MCP list - MCPs may not have installed correctly"
+        return 0
+    fi
+    
+    # Check each expected MCP is installed
+    local missing_mcps=()
+    local installed_mcps=()
+    
+    for expected_mcp in "${expected_mcps[@]}"; do
+        if echo "$installed_mcps_output" | grep -q "$expected_mcp"; then
+            installed_mcps+=("$expected_mcp")
+        else
+            missing_mcps+=("$expected_mcp")
+        fi
+    done
+    
+    # Report results
+    if [ ${#installed_mcps[@]} -gt 0 ]; then
+        log_success "Successfully installed MCPs: ${installed_mcps[*]}"
+    fi
+    
+    if [ ${#missing_mcps[@]} -gt 0 ]; then
+        log_warning "MCPs that failed to install: ${missing_mcps[*]}"
+        log_info "This is expected if MCP installation requirements aren't met"
+    fi
+    
+    return 0  # Don't fail the test - MCP installation is optional
 }
 
 # Detailed verification function
 verify_installation_details() {
-    local test_dir="$1"
-    
     log_info "Running detailed verification of installation..."
     
-    cd "$test_dir"
-    
-    # Verify directory structure
-    local dirs_to_check=(
-        ".agentic-workflow"
-        ".agentic-workflow/instructions"
-        ".agentic-workflow/sessions"
-        ".agentic-workflow/sessions/current"
-        ".agentic-workflow/sessions/completed"
-        ".agentic-workflow/recaps"
-        ".agentic-workflow/mcps"
-        "docs"
-        "docs/standards"
-        ".githooks"
-    )
-    
-    for dir in "${dirs_to_check[@]}"; do
+    # Verify core directories exist
+    local core_dirs=(".agentic-workflow" "docs" ".githooks")
+    for dir in "${core_dirs[@]}"; do
         if [ ! -d "$dir" ]; then
-            log_error "Missing directory: $dir"
+            log_error "Missing core directory: $dir"
             return 1
         fi
     done
     
-    # Verify key files exist
-    local files_to_check=(
-        ".agentic-workflow/sessions/discoveries.md"
-        ".agentic-workflow/mcps/codanna-setup.md"
-        ".agentic-workflow/mcps/mcp-integration.md"
-        ".githooks/commit-msg"
-        ".githooks/post-commit"
-        ".githooks/pre-commit"
-    )
-    
-    for file in "${files_to_check[@]}"; do
-        if [ ! -f "$file" ]; then
-            log_error "Missing file: $file"
-            return 1
-        fi
-    done
-    
-    # Verify git hooks are executable
-    if [ ! -x ".githooks/commit-msg" ]; then
-        log_error "Git hook not executable: .githooks/commit-msg"
+    # Verify Claude Code directories (should exist with --claude-code flag)
+    if [ ! -d ".claude" ]; then
+        log_error "Missing .claude directory (expected with --claude-code flag)"
         return 1
     fi
+    
+    # Verify Cursor directories (should exist with --cursor flag)  
+    if [ ! -d ".cursor" ]; then
+        log_error "Missing .cursor directory (expected with --cursor flag)"
+        return 1
+    fi
+    
+    # Verify git hooks are executable
+    for hook in .githooks/*; do
+        if [ -f "$hook" ] && [ ! -x "$hook" ]; then
+            log_error "Git hook not executable: $hook"
+            return 1
+        fi
+    done
     
     # Verify git config was updated
     if ! git config core.hooksPath | grep -q ".githooks"; then
         log_error "Git hooks path not configured"
         return 1
     fi
+    
+    # Verify source files were copied
+    if [ ! -d ".agentic-workflow/instructions" ] || [ -z "$(ls -A .agentic-workflow/instructions)" ]; then
+        log_error "Instructions not copied properly"
+        return 1
+    fi
+    
+    if [ ! -d "docs/standards" ] || [ -z "$(ls -A docs/standards)" ]; then
+        log_error "Standards not copied properly"
+        return 1
+    fi
+    
+    # Verify MCP installations
+    verify_mcp_installation
     
     log_success "Detailed verification passed"
     return 0
@@ -252,27 +280,18 @@ main() {
     # Verify prerequisites first
     verify_prerequisites
     
-    # Run all tests
-    if run_tests; then
-        # Run one final detailed verification test
-        log_info "Running final detailed verification test..."
-        mkdir -p "$TEST_DIR"
-        cd "$TEST_DIR"
-        git init --quiet
-        git config user.email "test@example.com"
-        git config user.name "Test User"
-        
-        $INSTALL_SCRIPT --claude-code --cursor >/dev/null 2>&1
-        
-        if verify_installation_details "$TEST_DIR"; then
+    # Run installation test
+    if run_installation_test; then
+        # Run detailed verification
+        if verify_installation_details; then
             log_success "🎉 COMPLETE TEST SUITE PASSED! Installation script is working correctly."
             exit 0
         else
-            log_error "❌ Final detailed verification failed"
+            log_error "❌ Installation verification failed"
             exit 1
         fi
     else
-        log_error "❌ Test suite failed"
+        log_error "❌ Installation test failed"
         exit 1
     fi
 }

@@ -52,6 +52,30 @@ ELSE:
     → Return search results
 ```
 
+### Context7 Integration
+When Context7 MCP is available, leverage real-time documentation for external libraries:
+- **Library Documentation**: Fetch current official docs for 3rd party libraries
+- **API References**: Get up-to-date API documentation and examples
+- **Framework Guides**: Access current framework documentation and best practices
+- **Version-Specific Info**: Retrieve documentation for specific library versions
+
+**Usage Pattern for External Libraries**:
+```
+IF request involves external/3rd party library:
+    Query: "Get React Hook Form validation patterns"
+    → Include "use context7" to fetch current documentation
+    → Return integrated library docs with project context
+ELSE IF project-internal request:
+    → Use standard file-based retrieval
+    → Return internal documentation only
+```
+
+**Context7 Triggers**:
+- Requests mentioning external libraries (React, Express, PostgreSQL, etc.)
+- API integration questions requiring current documentation
+- Framework-specific implementation patterns
+- Library configuration and setup questions
+
 ## Output Format
 
 For new information:
@@ -110,16 +134,40 @@ Request: "Get Task 2.1 details from tasks.md"
 - "Check code style rules for [language]"
 - "Retrieve specific section from [document]"
 
+**Context7 Integration Triggers:**
+- "How to implement [external library feature]"
+- "Get current documentation for [framework/library]"
+- "Find API reference for [service/library]"
+- "Best practices for [external tool/framework]"
+- "Configuration examples for [3rd party library]"
+
 ## Example Usage Scenarios
 
+### Internal Project Documentation
 ✅ **Good**: Get product pitch from mission-lite.md for context
 ✅ **Good**: Extract Task 2.1 details from tasks.md
 ✅ **Good**: Find CSS styling rules from code-style.md
+
+### External Library Documentation (Context7)
+✅ **Good**: Get current React Hook Form validation patterns with Context7
+✅ **Good**: Find PostgreSQL JSON query examples using Context7
+✅ **Good**: Retrieve Express.js middleware best practices via Context7
+✅ **Good**: Get Stripe API integration examples with Context7
+
+### Anti-patterns
 ❌ **Bad**: Analyze and interpret business requirements
 ❌ **Bad**: Make decisions about what tasks to prioritize
 ❌ **Bad**: Retrieve information that's already in current context
 
-Example usage:
+### Example Usage Commands
+
+**Internal Documentation:**
 - "Get the product pitch from mission-lite.md"
 - "Find Ruby style rules from code-style.md"
 - "Extract Task 3 requirements from the password-reset spec"
+
+**External Library Documentation:**
+- "Get React testing library examples for form validation. use context7"
+- "Find PostgreSQL full-text search implementation. use context7"
+- "Retrieve Express.js rate limiting middleware setup. use context7"
+- "Get Tailwind CSS grid layout patterns. use context7"

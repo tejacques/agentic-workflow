@@ -276,99 +276,29 @@ fi
 echo ""
 echo "📥 Setting up MCP integration (optional)..."
 
-# Try to install Codanna MCP
-if command -v claude >/dev/null 2>&1; then
-    echo "  📂 Found Claude CLI, attempting Codanna MCP installation..."
-    if claude mcp add-json codanna '{"command":"codanna","args":["serve","--watch"],"env":{"RUST_LOG":"info"}}' 2>/dev/null; then
-        echo "  ✓ Codanna MCP installed successfully"
-    else
-        echo "  ⚠️  Codanna MCP installation failed (continuing without it)"
-    fi
+# Check if we have any MCP install scripts
+if [ -d "$AGENTIC_WORKFLOW_BASE_DIR/mcps" ] && [ -n "$(find "$AGENTIC_WORKFLOW_BASE_DIR/mcps" -name "*.sh" -type f 2>/dev/null)" ]; then
+    echo "  📂 Found MCP installation scripts..."
+    
+    # Run all .sh scripts in the mcps directory
+    for mcp_script in "$AGENTIC_WORKFLOW_BASE_DIR/mcps"/*.sh; do
+        if [ -f "$mcp_script" ]; then
+            script_name=$(basename "$mcp_script")
+            echo "  🔧 Running $script_name..."
+            
+            # Make sure script is executable and run it
+            if chmod +x "$mcp_script" && "$mcp_script"; then
+                echo "  ✓ $script_name completed successfully"
+            else
+                echo "  ⚠️  $script_name failed (continuing without it)"
+            fi
+        fi
+    done
 else
-    echo "  ⚠️  Claude CLI not found - skipping MCP installation"
+    echo "  ⚠️  No MCP installation scripts found - skipping MCP setup"
 fi
 
-# Create MCP setup guides
-cat > "$AGENTIC_DIR/mcps/codanna-setup.md" << 'EOF'
-# Codanna MCP Setup Guide
-
-Codanna provides semantic code search capabilities for enhanced context fetching.
-
-## Installation
-
-### Prerequisites
-- Rust toolchain installed
-- Claude CLI available
-
-### Install Codanna
-```bash
-cargo install codanna
-```
-
-### Setup in Project
-```bash
-# Initialize Codanna
-codanna init
-
-# Index your codebase
-codanna index src
-
-# Add MCP to Claude (if not already added)
-claude mcp add-json codanna '{"command":"codanna","args":["serve","--watch"],"env":{"RUST_LOG":"info"}}'
-```
-
-## Usage
-
-The context-fetcher agent will automatically use Codanna when available, falling back to grep/read approaches when not available.
-
-## Troubleshooting
-
-If Codanna is not working:
-1. Check that it's installed: `codanna --version`
-2. Verify indexing: `codanna list`
-3. Test MCP: `claude mcp list`
-
-The workflow will continue to function without Codanna.
-EOF
-
-cat > "$AGENTIC_DIR/mcps/mcp-integration.md" << 'EOF'
-# MCP Integration Guide
-
-This project supports Model Context Protocol (MCP) integrations for enhanced capabilities.
-
-## Supported MCPs
-
-### Codanna (Default)
-- Semantic code search and analysis
-- AST-based symbol navigation
-- Enhanced context fetching
-
-## Adding New MCPs
-
-```bash
-# Add new MCP
-claude mcp add-json <name> '{"command":"<command>","args":["<args>"]}'
-
-# List installed MCPs
-claude mcp list
-
-# Remove MCP
-claude mcp remove <name>
-```
-
-## Conditional Usage
-
-All MCP integrations are conditional - the workflow functions fully without them but provides enhanced capabilities when available.
-
-## Best Practices
-
-1. Test MCP functionality before relying on it
-2. Always provide fallback behavior
-3. Document MCP-specific features clearly
-4. Keep MCP dependencies optional
-EOF
-
-echo "  ✓ MCP setup guides created"
+echo "  ✓ MCP integration setup complete"
 
 # Success message
 echo ""
@@ -418,9 +348,6 @@ echo "--------------------------------"
 echo ""
 echo "💡 Tip: You can customize your standards and instructions in docs/"
 echo "💡 Tip: To update from your agentic-workflow base, just run this script again"
-echo ""
-echo "Refer to the official Agentic Project Workflow docs at:"
-echo "https://buildermethods.com/agentic-workflow"
 echo ""
 echo "Keep building! 🚀"
 echo ""
