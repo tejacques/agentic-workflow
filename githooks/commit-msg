@@ -1,0 +1,25 @@
+#!/bin/bash
+#
+# Git commit-msg hook to prevent Claude Code attribution in commit messages
+# This enforces the rule in ./.claude/CLAUDE.md to never mention Claude Code in commits
+#
+
+commit_msg_file="$1"
+
+# Check for Claude Code attribution patterns
+if grep -q "Generated with.*Claude Code" "$commit_msg_file"; then
+    echo "ERROR: Commit message contains 'Generated with [Claude Code]' attribution"
+    echo "This violates the ./.claude/CLAUDE.md guidelines which explicitly forbid mentioning Claude Code in commits"
+    echo "Please remove the Claude Code attribution and commit again"
+    exit 1
+fi
+
+if grep -q "Co-Authored-By: Claude" "$commit_msg_file"; then
+    echo "ERROR: Commit message contains 'Co-Authored-By: Claude' attribution"
+    echo "This violates the ./.claude/CLAUDE.md guidelines which explicitly forbid mentioning Claude Code in commits"
+    echo "Please remove the Claude attribution and commit again"
+    exit 1
+fi
+
+# Hook completed successfully
+exit 0

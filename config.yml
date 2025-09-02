@@ -1,0 +1,24 @@
+# Agentic Project Workflow Configuration
+
+agentic_project_workflow_version: 1.0.0
+
+agents:
+  claude_code:
+    enabled: false
+  cursor:
+    enabled: false
+
+project_types:
+  default:
+    instructions: ~/docs/instructions
+    standards: ~/docs/standards
+
+  # type_a:
+  #   instructions: ~/docs/project_types/type_a/instructions
+  #   standards: ~/docs/project_types/type_a/standards
+
+  # type_b:
+  #   instructions: ~/docs/project_types/type_b/instructions
+  #   standards: ~/docs/project_types/type_b/standards
+
+default_project_type: default

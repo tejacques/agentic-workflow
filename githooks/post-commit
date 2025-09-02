@@ -1,0 +1,34 @@
+#!/bin/bash
+#
+# Post-commit hook for session logging integration
+# Logs commit information to current session transcript
+#
+
+# Only proceed if .agentic-workflow directory exists
+if [ ! -d ".agentic-workflow" ]; then
+    exit 0
+fi
+
+# Get commit information
+commit_hash=$(git rev-parse HEAD)
+commit_message=$(git log -1 --pretty=%B)
+commit_files=$(git diff-tree --no-commit-id --name-only -r HEAD)
+
+# Current timestamp
+timestamp=$(date '+%Y-%m-%d %H:%M')
+
+# Log to current session transcript if it exists
+transcript_file=".agentic-workflow/sessions/current/transcript.md"
+if [ -f "$transcript_file" ]; then
+    echo "" >> "$transcript_file"
+    echo "### [$timestamp] Git Commit: $commit_hash" >> "$transcript_file"
+    echo "" >> "$transcript_file"
+    echo "**Commit Message:**" >> "$transcript_file"
+    echo "$commit_message" >> "$transcript_file"
+    echo "" >> "$transcript_file"
+    echo "**Files Changed:**" >> "$transcript_file"
+    echo "$commit_files" | sed 's/^/- /' >> "$transcript_file"
+    echo "" >> "$transcript_file"
+fi
+
+exit 0
