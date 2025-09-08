@@ -1,7 +1,14 @@
 ---
-description: Generate detailed task breakdown for feature implementation based on specifications
-argument-hint: [spec-name] [focus-area]
-allowed-tools: Task(subagent_type:context-fetcher), Read, Write, Edit, Bash, Grep, Glob
+description: "Generate detailed task breakdown for feature implementation based on specifications"
+argument-hint: "[spec-name] [focus-area]"
+allowed-tools:
+  - "Task(subagent_type:context-fetcher)"
+  - Read
+  - Write
+  - Edit
+  - Bash
+  - Grep
+  - Glob
 ---
 
 # Create Tasks
