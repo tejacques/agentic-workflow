@@ -1,7 +1,14 @@
 ---
-description: Resume interrupted task execution with full context restoration from session history
-argument-hint: [task-identifier] [session-id]
-allowed-tools: Task(subagent_type:context-fetcher,project-manager), Read, Write, Edit, Bash, Grep, Glob
+description: "Resume interrupted task execution with full context restoration from session history"
+argument-hint: "[task-identifier] [session-id]"
+allowed-tools:
+  - "Task(subagent_type:context-fetcher,project-manager)"
+  - Read
+  - Write
+  - Edit
+  - Bash
+  - Grep
+  - Glob
 ---
 
 # Resume Task
