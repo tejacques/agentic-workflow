@@ -1,7 +1,14 @@
 ---
-description: Initialize a new product with mission, roadmap, and Agentic Project Workflow setup
-argument-hint: [product-name] [project-directory]
-allowed-tools: Task(subagent_type:file-creator), Read, Write, Edit, Bash, Grep, Glob
+description: "Initialize a new product with mission, roadmap, and Agentic Project Workflow setup"
+argument-hint: "[product-name] [project-directory]"
+allowed-tools:
+  - "Task(subagent_type:file-creator)"
+  - Read
+  - Write
+  - Edit
+  - Bash
+  - Grep
+  - Glob
 ---
 
 # Plan Product
