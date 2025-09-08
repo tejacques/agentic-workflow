@@ -1,7 +1,14 @@
 ---
-description: Create a detailed feature specification with technical requirements and task breakdown
-argument-hint: [feature-name] [user-story]
-allowed-tools: Task(subagent_type:context-fetcher,file-creator), Read, Write, Edit, Bash, Grep, Glob
+description: "Create a detailed feature specification with technical requirements and task breakdown"
+argument-hint: "[feature-name] [user-story]"
+allowed-tools:
+  - "Task(subagent_type:context-fetcher,file-creator)"
+  - Read
+  - Write
+  - Edit
+  - Bash
+  - Grep
+  - Glob
 ---
 
 # Create Spec
