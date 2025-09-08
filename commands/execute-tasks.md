@@ -1,7 +1,14 @@
 ---
-description: Execute implementation tasks for a specific feature specification
-argument-hint: [spec-name] [task-number]
-allowed-tools: Task(subagent_type:project-manager,context-fetcher,file-creator,git-workflow), Read, Write, Edit, Bash, Grep, Glob
+description: "Execute implementation tasks for a specific feature specification"
+argument-hint: "[spec-name] [task-number]"
+allowed-tools:
+  - "Task(subagent_type:project-manager,context-fetcher,file-creator,git-workflow)"
+  - Read
+  - Write
+  - Edit
+  - Bash
+  - Grep
+  - Glob
 ---
 
 # Execute Tasks
